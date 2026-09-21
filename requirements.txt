@@ -1,0 +1,18 @@
+# --- Core LangChain & LangGraph ---
+langchain
+langchain-core
+langchain-community
+langgraph
+
+# --- LLM Provider (Google Gemini) ---
+langchain-google-genai
+google-genai
+
+# --- Search & Scraping Tools ---
+tavily-python
+beautifulsoup4
+requests
+
+# --- Data Validation & Utilities ---
+pydantic
+python-dotenv
