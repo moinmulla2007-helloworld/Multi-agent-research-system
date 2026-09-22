@@ -4,8 +4,8 @@ from agents import build_reader_agent, build_search_agent, writer_chain, critic_
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Multiagent · Research Agent",
-    page_icon="◆",
+    page_title="Dossier · Research Agent",
+    page_icon="✦",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -13,212 +13,263 @@ st.set_page_config(
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
 
 html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-    color: #dcd9f0;
+    font-family: 'Newsreader', Georgia, serif;
+    color: #2b271f;
 }
 
 .stApp {
-    background: #08080c;
+    background: #f6f2e9;
     background-image:
-        radial-gradient(ellipse 70% 50% at 85% -5%, rgba(120,90,255,0.14) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 5% 100%, rgba(40,220,190,0.08) 0%, transparent 55%);
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(43,39,31,0.035) 40px);
 }
 
 #MainMenu, footer, header { visibility: hidden; }
-.block-container { padding: 1.5rem 3rem 4rem; max-width: 1180px; }
+.block-container { padding: 2.2rem 3.5rem 5rem; max-width: 1100px; }
 
 /* ── Sidebar ── */
 section[data-testid="stSidebar"] {
-    background: #0c0c13;
-    border-right: 1px solid rgba(140,120,255,0.12);
+    background: #eee7d6;
+    border-right: 2px solid #2b271f;
 }
-section[data-testid="stSidebar"] .block-container { padding-top: 2rem; }
+section[data-testid="stSidebar"] .block-container { padding-top: 2.4rem; }
 
 .brand {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: #f2f0fa;
-    letter-spacing: -0.01em;
-    margin-bottom: 0.1rem;
-}
-.brand span { color: #8b7bff; }
-.brand-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
+    color: #2b271f;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: #5a5670;
-    margin-bottom: 2rem;
+    border-bottom: 3px solid #b5482a;
+    display: inline-block;
+    padding-bottom: 0.2rem;
+    margin-bottom: 0.4rem;
+}
+.brand-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #7a725e;
+    margin-bottom: 2.2rem;
 }
 
 .sidebar-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #8b7bff;
-    margin: 1.6rem 0 0.6rem;
+    color: #b5482a;
+    margin: 1.8rem 0 0.6rem;
 }
+.sidebar-label::before { content: "§ "; }
 
 section[data-testid="stSidebar"] .stTextArea textarea {
-    background: rgba(255,255,255,0.04) !important;
-    border: 1px solid rgba(140,120,255,0.2) !important;
-    border-radius: 8px !important;
-    color: #f2f0fa !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.9rem !important;
+    background: #f6f2e9 !important;
+    border: 1.5px solid #2b271f !important;
+    border-radius: 0px !important;
+    color: #2b271f !important;
+    font-family: 'Newsreader', serif !important;
+    font-size: 0.98rem !important;
+    box-shadow: 3px 3px 0px rgba(43,39,31,0.15) !important;
 }
 section[data-testid="stSidebar"] .stTextArea textarea:focus {
-    border-color: #8b7bff !important;
-    box-shadow: 0 0 0 3px rgba(139,123,255,0.15) !important;
+    border-color: #b5482a !important;
+    box-shadow: 3px 3px 0px rgba(181,72,42,0.25) !important;
 }
 
 section[data-testid="stSidebar"] .stButton > button {
-    background: #8b7bff !important;
-    color: #08080c !important;
-    font-family: 'Space Grotesk', sans-serif !important;
-    font-weight: 600 !important;
-    font-size: 0.88rem !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 0.65rem 1rem !important;
+    background: #2b271f !important;
+    color: #f6f2e9 !important;
+    font-family: 'Space Mono', monospace !important;
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1.5px solid #2b271f !important;
+    border-radius: 0px !important;
+    padding: 0.7rem 1rem !important;
     width: 100%;
-    transition: background 0.15s, transform 0.15s !important;
+    transition: all 0.12s !important;
 }
 section[data-testid="stSidebar"] .stButton > button:hover {
-    background: #a094ff !important;
-    transform: translateY(-1px) !important;
+    background: #b5482a !important;
+    border-color: #b5482a !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 3px 3px 0px #2b271f !important;
 }
 
-.chip-row { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.8rem; }
+.chip-row { display:flex; flex-direction: column; gap:0.5rem; margin-top:0.6rem; }
 .chip {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    color: #9490b0;
-    background: rgba(140,120,255,0.08);
-    border: 1px solid rgba(140,120,255,0.15);
-    border-radius: 20px;
-    padding: 0.3rem 0.75rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: #4a4536;
+    background: transparent;
+    border-left: 2px solid #b5482a;
+    padding: 0.2rem 0 0.2rem 0.6rem;
 }
+
+.pipeline-list {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: #4a4536;
+    line-height: 2.1;
+}
+.pipeline-list b { color: #2b271f; }
 
 /* ── Main header ── */
-.main-header {
+.masthead {
+    border-bottom: 3px double #2b271f;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1.6rem;
+}
+.masthead-top {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 0.3rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7a725e;
+    margin-bottom: 0.5rem;
 }
 .main-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.9rem;
-    font-weight: 700;
-    color: #f2f0fa;
+    font-family: 'Newsreader', serif;
+    font-size: 2.6rem;
+    font-weight: 600;
+    font-style: italic;
+    color: #2b271f;
+    line-height: 1.1;
 }
 .main-topic {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: #6ee7c9;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: #b5482a;
+    margin-top: 0.5rem;
 }
 .main-sub {
-    font-size: 0.92rem;
-    color: #75718f;
-    margin-bottom: 1.8rem;
+    font-size: 1rem;
+    color: #5c563f;
+    font-style: italic;
+    margin-top: 0.4rem;
 }
 
-/* ── Log-style pipeline tracker ── */
+/* ── Ledger-style pipeline tracker ── */
 .log-line {
     display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    padding: 0.55rem 0.2rem;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    align-items: baseline;
+    gap: 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.65rem 0.1rem;
+    border-bottom: 1px dashed #cfc6ac;
 }
-.log-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    flex-shrink: 0;
-    background: #333047;
+.log-marker {
+    width: 16px; text-align: center; flex-shrink: 0;
+    font-size: 0.9rem;
+    color: #cfc6ac;
 }
-.log-line.running .log-dot { background: #8b7bff; box-shadow: 0 0 8px rgba(139,123,255,0.7); animation: pulse 1.2s infinite; }
-.log-line.done .log-dot { background: #6ee7c9; }
-@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+.log-line.running .log-marker { color: #b5482a; animation: blink 1s infinite; }
+.log-line.done .log-marker { color: #2b271f; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
 
-.log-step { color: #5a5670; min-width: 20px; }
-.log-name { color: #cbc8e0; min-width: 150px; }
-.log-detail { color: #55516c; flex: 1; }
-.log-status { min-width: 70px; text-align: right; }
-.log-line.waiting .log-status { color: #3c3950; }
-.log-line.running .log-status { color: #8b7bff; }
-.log-line.done .log-status { color: #6ee7c9; }
+.log-step { color: #a89f84; min-width: 22px; }
+.log-name { color: #2b271f; min-width: 150px; font-weight: 700; }
+.log-detail { color: #7a725e; flex: 1; font-style: italic; }
+.log-status { min-width: 75px; text-align: right; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.7rem; }
+.log-line.waiting .log-status { color: #cfc6ac; }
+.log-line.running .log-status { color: #b5482a; }
+.log-line.done .log-status { color: #2b271f; }
 
 /* ── Result tabs ── */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 0.3rem;
+    gap: 0;
     background: transparent;
-    border-bottom: 1px solid rgba(140,120,255,0.15);
+    border-bottom: 2px solid #2b271f;
 }
 .stTabs [data-baseweb="tab"] {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    letter-spacing: 0.05em;
-    color: #75718f;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7a725e;
     background: transparent;
-    border-radius: 6px 6px 0 0;
-    padding: 0.6rem 1.2rem;
+    border: none;
+    padding: 0.7rem 1.4rem;
 }
 .stTabs [aria-selected="true"] {
-    color: #8b7bff !important;
-    background: rgba(139,123,255,0.08) !important;
+    color: #f6f2e9 !important;
+    background: #2b271f !important;
 }
 
 .content-block {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 1.8rem 2rem;
-    margin-top: 1.2rem;
-    font-size: 0.92rem;
-    line-height: 1.75;
-    color: #cbc8e0;
+    background: #fffdf6;
+    border: 1.5px solid #2b271f;
+    padding: 2rem 2.4rem;
+    margin-top: 1.4rem;
+    font-size: 1.02rem;
+    line-height: 1.8;
+    color: #2b271f;
+    box-shadow: 5px 5px 0px rgba(43,39,31,0.08);
 }
-.content-block.accent-violet { border-color: rgba(139,123,255,0.25); }
-.content-block.accent-teal { border-color: rgba(110,231,201,0.25); }
+.content-block.accent-rust { border-left: 5px solid #b5482a; }
+.content-block.accent-ink { border-left: 5px solid #2b271f; }
+
 .raw-block {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 10px;
-    padding: 1.4rem 1.6rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    line-height: 1.7;
-    color: #9490b0;
+    background: #eee7d6;
+    border: 1px solid #cfc6ac;
+    padding: 1.5rem 1.7rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.76rem;
+    line-height: 1.75;
+    color: #4a4536;
     white-space: pre-wrap;
-    max-height: 420px;
+    max-height: 440px;
     overflow-y: auto;
 }
 
 .empty-state {
     text-align: center;
-    padding: 5rem 2rem;
-    color: #454258;
+    padding: 5.5rem 2rem;
+    color: #a89f84;
+    border: 1.5px dashed #cfc6ac;
+    margin-top: 1rem;
 }
-.empty-state .glyph { font-size: 2.2rem; margin-bottom: 1rem; color: #8b7bff; opacity: 0.6; }
-.empty-state .msg { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+.empty-state .glyph { font-size: 2rem; margin-bottom: 1rem; color: #b5482a; }
+.empty-state .msg { font-family: 'Space Mono', monospace; font-size: 0.82rem; letter-spacing: 0.03em; }
 
-.stSpinner > div { color: #8b7bff !important; }
+.stSpinner > div { color: #b5482a !important; }
 
 .footer-note {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    color: #3c3950;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.66rem;
+    color: #a89f84;
     text-align: center;
     margin-top: 3.5rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-top: 1px solid #cfc6ac;
+    padding-top: 1.2rem;
+}
+
+[data-testid="stDownloadButton"] button {
+    background: #fffdf6 !important;
+    color: #2b271f !important;
+    border: 1.5px solid #2b271f !important;
+    border-radius: 0 !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 0.74rem !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+[data-testid="stDownloadButton"] button:hover {
+    background: #b5482a !important;
+    border-color: #b5482a !important;
+    color: #fffdf6 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -232,8 +283,8 @@ for key, default in (("results", {}), ("running", False), ("done", False), ("top
 
 # ── Sidebar: input ─────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="brand">Multiagent<span>.</span></div>', unsafe_allow_html=True)
-    st.markdown('<div class="brand-tag">Multi-Agent Research Console</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand">Dossier</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand-tag">Field Notes from Four Agents</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="sidebar-label">Research Topic</div>', unsafe_allow_html=True)
     topic = st.text_area(
@@ -243,7 +294,7 @@ with st.sidebar:
         label_visibility="collapsed",
         key="topic_input",
     )
-    run_btn = st.button("Run pipeline →", use_container_width=True)
+    run_btn = st.button("Open the case →", use_container_width=True)
 
     st.markdown('<div class="sidebar-label">Try instead</div>', unsafe_allow_html=True)
     st.markdown("""
@@ -254,24 +305,28 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="sidebar-label">Pipeline</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-label">The Process</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#5a5670; line-height:2;">
-        01 · search agent<br>
-        02 · reader agent<br>
-        03 · writer chain<br>
-        04 · critic chain
+    <div class="pipeline-list">
+        <b>I.</b>&nbsp; Search Agent<br>
+        <b>II.</b>&nbsp; Reader Agent<br>
+        <b>III.</b>&nbsp; Writer Chain<br>
+        <b>IV.</b>&nbsp; Critic Chain
     </div>
     """, unsafe_allow_html=True)
 
 
 # ── Main header ───────────────────────────────────────────────────────────────
 st.markdown(f"""
-<div class="main-header">
+<div class="masthead">
+    <div class="masthead-top">
+        <span>Vol. I — The Research Desk</span>
+        <span>{time.strftime("%d %b %Y")}</span>
+    </div>
     <div class="main-title">Research Console</div>
-    {'<div class="main-topic">' + st.session_state.topic_run + '</div>' if st.session_state.topic_run else ''}
+    {'<div class="main-topic">ON THE SUBJECT OF: ' + st.session_state.topic_run.upper() + '</div>' if st.session_state.topic_run else ''}
+    <div class="main-sub">Four correspondents, one dispatch: search, read, write, critique.</div>
 </div>
-<div class="main-sub">Four agents run in sequence: search → read → write → critique.</div>
 """, unsafe_allow_html=True)
 
 
@@ -289,10 +344,10 @@ if run_btn:
 
 # ── Pipeline log tracker ─────────────────────────────────────────────────────
 steps = [
-    ("01", "search", "Search Agent", "gathering recent web sources"),
-    ("02", "reader", "Reader Agent", "scraping top result for depth"),
-    ("03", "writer", "Writer Chain", "drafting structured report"),
-    ("04", "critic", "Critic Chain", "scoring and reviewing"),
+    ("I", "search", "Search Agent", "gathering recent web sources"),
+    ("II", "reader", "Reader Agent", "scraping top result for depth"),
+    ("III", "writer", "Writer Chain", "drafting structured report"),
+    ("IV", "critic", "Critic Chain", "scoring and reviewing"),
 ]
 
 def step_state(key):
@@ -311,11 +366,12 @@ def render_log():
     rows = []
     for num, key, name, detail in steps:
         state = step_state(key)
-        label = {"waiting": "waiting", "running": "running…", "done": "done"}[state]
+        marker = {"waiting": "○", "running": "●", "done": "✦"}[state]
+        label = {"waiting": "pending", "running": "in progress", "done": "filed"}[state]
         rows.append(f"""
         <div class="log-line {state}">
-            <span class="log-dot"></span>
-            <span class="log-step">{num}</span>
+            <span class="log-marker">{marker}</span>
+            <span class="log-step">{num}.</span>
             <span class="log-name">{name}</span>
             <span class="log-detail">{detail}</span>
             <span class="log-status">{label}</span>
@@ -381,10 +437,10 @@ if st.session_state.running and not st.session_state.done:
 r = st.session_state.results
 
 if r and "writer" in r:
-    tab_report, tab_critic, tab_raw = st.tabs(["◆ Report", "◇ Critic Feedback", "⌁ Raw Agent Output"])
+    tab_report, tab_critic, tab_raw = st.tabs(["The Report", "Editor's Notes", "Correspondence"])
 
     with tab_report:
-        st.markdown('<div class="content-block accent-violet">', unsafe_allow_html=True)
+        st.markdown('<div class="content-block accent-rust">', unsafe_allow_html=True)
         st.markdown(r["writer"])
         st.markdown('</div>', unsafe_allow_html=True)
         st.download_button(
@@ -396,7 +452,7 @@ if r and "writer" in r:
 
     with tab_critic:
         if "critic" in r:
-            st.markdown('<div class="content-block accent-teal">', unsafe_allow_html=True)
+            st.markdown('<div class="content-block accent-ink">', unsafe_allow_html=True)
             st.markdown(r["critic"])
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -411,13 +467,13 @@ if r and "writer" in r:
 elif not st.session_state.running:
     st.markdown("""
     <div class="empty-state">
-        <div class="glyph">◆</div>
-        <div class="msg">Enter a topic in the sidebar and run the pipeline to see results here.</div>
+        <div class="glyph">✦</div>
+        <div class="msg">Enter a topic in the margin and open the case to see the dossier here.</div>
     </div>
     """, unsafe_allow_html=True)
 
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="footer-note">NYRA · LANGCHAIN MULTI-AGENT PIPELINE · STREAMLIT</div>
+<div class="footer-note">Dossier · Langchain Multi-Agent Pipeline · Streamlit</div>
 """, unsafe_allow_html=True)
